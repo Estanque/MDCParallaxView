@@ -25,7 +25,6 @@
 
 #import "MDCParallaxView.h"
 
-
 static void * kMDCForegroundViewObservationContext = &kMDCForegroundViewObservationContext;
 static void * kMDCBackgroundViewObservationContext = &kMDCBackgroundViewObservationContext;
 static CGFloat const kMDCParallaxViewDefaultHeight = 150.0f;
@@ -39,7 +38,6 @@ static CGFloat const kMDCParallaxViewDefaultHeight = 150.0f;
 
 
 @implementation MDCParallaxView
-
 
 #pragma mark - Object Lifecycle
 
@@ -74,7 +72,6 @@ static CGFloat const kMDCParallaxViewDefaultHeight = 150.0f;
     [self removeFrameObservers];
 }
 
-
 #pragma mark - NSKeyValueObserving Protocol Methods
 
 - (void)observeValueForKeyPath:(NSString *)keyPath
@@ -92,7 +89,6 @@ static CGFloat const kMDCParallaxViewDefaultHeight = 150.0f;
     }
 }
 
-
 #pragma mark - NSObject Overrides
 
 - (void)forwardInvocation:(NSInvocation *)anInvocation {
@@ -107,7 +103,6 @@ static CGFloat const kMDCParallaxViewDefaultHeight = 150.0f;
     return ([super respondsToSelector:aSelector] ||
             [self.scrollViewDelegate respondsToSelector:aSelector]);
 }
-
 
 #pragma mark - UIView Overrides
 
@@ -131,13 +126,15 @@ static CGFloat const kMDCParallaxViewDefaultHeight = 150.0f;
         CGFloat visibleBackgroundViewHeight =
             self.backgroundHeight - self.foregroundScrollView.contentOffset.y;
         if (point.y < visibleBackgroundViewHeight){
-            return [self.backgroundView hitTest:point withEvent:event];
+            CGPoint p = [self convertPoint:point
+                                    toView:self.backgroundView];
+            return [self.backgroundView hitTest:p
+                                      withEvent:event];
         }
     }
 
     return [super hitTest:point withEvent:event];
 }
-
 
 #pragma mark - UIScrollViewDelegate Protocol Methods
 
@@ -160,9 +157,6 @@ static CGFloat const kMDCParallaxViewDefaultHeight = 150.0f;
     [self updateForegroundFrame];
     [self updateContentOffset];
 }
-
-
-#pragma mark - Internal Methods
 
 #pragma mark Key-Value Observing
 
@@ -224,15 +218,7 @@ static CGFloat const kMDCParallaxViewDefaultHeight = 150.0f;
 
 - (void)updateContentOffset {
     CGFloat offsetY   = self.foregroundScrollView.contentOffset.y;
-    CGFloat threshold = CGRectGetHeight(self.backgroundView.frame) - self.backgroundHeight;
-
-    if (offsetY > -threshold && offsetY < 0.0f) {
-        self.backgroundScrollView.contentOffset = CGPointMake(0.0f, floorf(offsetY/2));
-    } else if (offsetY < 0.0f) {
-        self.backgroundScrollView.contentOffset = CGPointMake(0.0f, offsetY + floorf(threshold/2));
-    } else {
-        self.backgroundScrollView.contentOffset = CGPointMake(0.0f, offsetY);
-    }
+    self.backgroundScrollView.contentOffset = CGPointMake(0.0f, floorf(offsetY/2));
 }
 
 @end
